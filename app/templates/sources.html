@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="page-header">
+  <div>
+    <p class="eyebrow">来源管理</p>
+    <h2>信源列表与同步结果</h2>
+  </div>
+  <form action="/ui/sources/sync" method="post">
+    <button type="submit">同步本周信源</button>
+  </form>
+</section>
+
+<section class="card">
+  <h3>已配置来源</h3>
+  <table>
+    <thead><tr><th>名称</th><th>类型</th><th>分类</th><th>入口</th></tr></thead>
+    <tbody>
+      {% for source in sources %}
+      <tr>
+        <td>{{ source.name }}</td>
+        <td>{{ source.source_type }}</td>
+        <td>{{ source.categories|join(', ') }}</td>
+        <td>{{ source.feed_url or source.page_url }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="card">
+  <h3>当前主题池概览</h3>
+  <p class="muted">{{ topics.week_key }} · {{ topics.count }} 个主题簇</p>
+  <ul>
+    {% for topic in topics.topics[:8] %}
+    <li>{{ topic.title }} · {{ topic.category }} · 分数 {{ topic.score }}</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

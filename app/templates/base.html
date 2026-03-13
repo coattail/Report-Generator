@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ app_title }}</title>
+    <link rel="stylesheet" href="/static/styles.css">
+  </head>
+  <body>
+    <aside class="sidebar">
+      <h1>{{ app_title }}</h1>
+      <nav>
+        <a href="/" class="{% if current_path == '/' %}active{% endif %}">仪表盘</a>
+        <a href="/settings" class="{% if current_path == '/settings' %}active{% endif %}">设置中心</a>
+        <a href="/corpus" class="{% if current_path == '/corpus' %}active{% endif %}">语料导入</a>
+        <a href="/sources" class="{% if current_path == '/sources' %}active{% endif %}">来源管理</a>
+        <a href="/topics-board" class="{% if current_path == '/topics-board' %}active{% endif %}">本周候选主题</a>
+        <a href="/training" class="{% if current_path == '/training' %}active{% endif %}">训练与评测</a>
+        <a href="/history" class="{% if current_path == '/history' %}active{% endif %}">历史草稿</a>
+      </nav>
+    </aside>
+    <main class="content">
+      {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>

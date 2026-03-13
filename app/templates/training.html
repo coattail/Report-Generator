@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="page-header">
+  <div>
+    <p class="eyebrow">训练与评测</p>
+    <h2>运行 SFT、偏好训练、回归评测与模型切换</h2>
+  </div>
+</section>
+
+<section class="grid cols-3">
+  <article class="card">
+    <h3>监督微调</h3>
+    <form action="/ui/training/sft" method="post"><button type="submit">运行 SFT</button></form>
+  </article>
+  <article class="card">
+    <h3>偏好训练</h3>
+    <form action="/ui/training/preferences" method="post"><button type="submit">运行 Preferences</button></form>
+  </article>
+  <article class="card">
+    <h3>回归评测</h3>
+    <form action="/ui/eval/run" method="post"><button type="submit">运行 Eval</button></form>
+  </article>
+</section>
+
+<section class="card">
+  <h3>当前生产模型</h3>
+  <p>{{ production_model.id or "尚未设置" }}</p>
+  <p class="muted">{{ production_model.base_model or "无" }}</p>
+</section>
+
+<section class="card">
+  <h3>模型产物</h3>
+  <table>
+    <thead><tr><th>ID</th><th>角色</th><th>状态</th><th>Base</th><th>操作</th></tr></thead>
+    <tbody>
+      {% for artifact in artifacts %}
+      <tr>
+        <td>{{ artifact.id }}</td>
+        <td>{{ artifact.role }}</td>
+        <td>{{ artifact.status }}{% if artifact.is_production %} · production{% endif %}</td>
+        <td>{{ artifact.base_model }}</td>
+        <td>
+          <form action="/ui/models/promote" method="post" class="inline-form">
+            <input type="hidden" name="artifact_id" value="{{ artifact.id }}">
+            <button type="submit">晋升</button>
+          </form>
+          <form action="/ui/models/rollback" method="post" class="inline-form">
+            <input type="hidden" name="artifact_id" value="{{ artifact.id }}">
+            <button type="submit">回滚</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="muted">还没有训练产物。</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

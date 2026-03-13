@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="page-header">
+  <div>
+    <p class="eyebrow">本周候选主题</p>
+    <h2>{{ topics.week_key }} 主题池</h2>
+    <p class="muted">系统会按训练偏好先筛出 10-15 个优先候选；你勾选后，平台会生成并直接下载本期报告到系统下载文件夹。</p>
+  </div>
+  <form action="/ui/sources/sync" method="post">
+    <button type="submit">重新同步</button>
+  </form>
+</section>
+
+<section class="card">
+  <h3>推荐候选</h3>
+  <p class="muted">这一组来自你的历史训练、反馈和当前信源交叉结果，适合作为进入工作台后的第一屏选择。</p>
+  <form action="/ui/issues/create-download" method="post">
+    <label>周序号
+      <input type="text" name="week_key" value="{{ topics.week_key }}" required>
+    </label>
+    <label>标题
+      <input type="text" name="title" value="{{ topics.week_key }} 推荐选题简报" required>
+    </label>
+    <input type="hidden" name="generate_now" value="true">
+    <input type="hidden" name="download_format" value="md">
+    <div class="topic-grid">
+      {% for topic in topics.recommended_topics %}
+      <label class="topic-card recommended-card">
+        <input type="checkbox" name="topic_ids" value="{{ topic.id }}" {% if loop.index <= 4 %}checked{% endif %}>
+        <span class="topic-badge">推荐 {{ loop.index }}</span>
+        <span class="topic-title">{{ topic.title }}</span>
+        <span class="topic-meta">{{ topic.category }} · 综合分 {{ topic.recommendation_score }}</span>
+        <span class="topic-summary">{{ topic.summary }}</span>
+        <span class="topic-reasons">{{ topic.recommendation_reasons|join(" · ") }}</span>
+      </label>
+      {% else %}
+      <p class="muted">还没有候选主题，请先同步来源。</p>
+      {% endfor %}
+    </div>
+    <div class="form-actions">
+      <button type="submit">生成并下载报告</button>
+      <a class="button-link secondary-link" href="/">返回工作台首页</a>
+    </div>
+  </form>
+</section>
+
+<section class="card">
+  <h3>完整主题池</h3>
+  <p class="muted">除了优先候选，其余主题也会保留在这里，方便你手动替换或补充。</p>
+  <div class="topic-grid">
+    {% for topic in topics.other_topics %}
+    <label class="topic-card">
+      <span class="topic-title">{{ topic.title }}</span>
+      <span class="topic-meta">{{ topic.category }} · 基础分 {{ topic.score }}</span>
+      <span class="topic-summary">{{ topic.summary }}</span>
+    </label>
+    {% else %}
+    <p class="muted">当前所有主题都已进入推荐区。</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

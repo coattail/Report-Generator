@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="page-header">
+  <div>
+    <p class="eyebrow">语料导入</p>
+    <h2>上传历史周报，自动提炼风格画像与训练样本</h2>
+  </div>
+</section>
+
+<section class="grid cols-2">
+  <article class="card">
+    <h3>导入语料</h3>
+    <form action="/ui/corpus/import" method="post" enctype="multipart/form-data">
+      <input type="file" name="files" multiple required>
+      <button type="submit">上传并解析</button>
+    </form>
+    <p class="muted">支持 `Word / PDF / txt / md`。扫描版 PDF 暂不做 OCR。</p>
+  </article>
+  <article class="card">
+    <h3>画像摘要</h3>
+    <p>文档数：{{ corpus.profile.stats.document_count or 0 }}</p>
+    <ul>{% for note in corpus.profile.voice_notes %}<li>{{ note }}</li>{% endfor %}</ul>
+  </article>
+</section>
+
+<section class="card">
+  <h3>最近导入</h3>
+  <table>
+    <thead><tr><th>标题</th><th>文件</th><th>时间</th><th>标签</th></tr></thead>
+    <tbody>
+      {% for doc in corpus.documents %}
+      <tr>
+        <td>{{ doc.title }}</td>
+        <td>{{ doc.file_name }}</td>
+        <td>{{ doc.imported_at }}</td>
+        <td>{{ doc.structure_tags|join(', ') }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" class="muted">还没有导入语料。</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

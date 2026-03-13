@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <div>
+    <p class="eyebrow">单人私有重训练写作台</p>
+    <h2>本周生成、反馈、训练闭环已打通</h2>
+    <p>先导入历史语料，再同步信源、勾选主题、生成草稿，最后用你的改稿持续训练下一版模型。</p>
+  </div>
+  <div class="card">
+    <h3>当前生产模型</h3>
+    <p>{{ production_model.id or "尚未设置" }}</p>
+    <p class="muted">{{ production_model.base_model or "请先跑 SFT 并晋升模型" }}</p>
+  </div>
+</section>
+
+<section class="grid cols-4">
+  <article class="card">
+    <h3>历史语料</h3>
+    <p class="metric">{{ corpus.count }}</p>
+    <p class="muted">已导入文档数</p>
+  </article>
+  <article class="card">
+    <h3>推荐选题</h3>
+    <p class="metric">{{ topics.recommended_count }}</p>
+    <p class="muted">{{ topics.week_key }} · 已按偏好筛选</p>
+  </article>
+  <article class="card">
+    <h3>草稿任务</h3>
+    <p class="metric">{{ issues|length }}</p>
+    <p class="muted">最近已创建期数</p>
+  </article>
+  <article class="card">
+    <h3>模型产物</h3>
+    <p class="metric">{{ models|length }}</p>
+    <p class="muted">最近训练记录</p>
+  </article>
+</section>
+
+<section class="grid cols-2">
+  <article class="card">
+    <h3>进入工作台后的推荐选题</h3>
+    <p class="muted">系统会结合你训练出来的偏好、历史反馈和当前信源，优先给出 10-15 个更值得写的候选。默认勾选前 4 个，提交后会生成并直接下载到系统下载文件夹。</p>
+    {% if topics.recommended_topics %}
+    <form action="/ui/issues/create-download" method="post">
+      <input type="hidden" name="week_key" value="{{ topics.week_key }}">
+      <input type="hidden" name="generate_now" value="true">
+      <input type="hidden" name="download_format" value="md">
+      <label>本期标题
+        <input type="text" name="title" value="{{ topics.week_key }} 推荐选题简报" required>
+      </label>
+      <div class="topic-grid">
+        {% for topic in topics.recommended_topics %}
+        <label class="topic-card recommended-card">
+          <input type="checkbox" name="topic_ids" value="{{ topic.id }}" {% if loop.index <= 4 %}checked{% endif %}>
+          <span class="topic-badge">推荐 {{ loop.index }}</span>
+          <span class="topic-title">{{ topic.title }}</span>
+          <span class="topic-meta">{{ topic.category }} · 综合分 {{ topic.recommendation_score }}</span>
+          <span class="topic-summary">{{ topic.summary }}</span>
+          <span class="topic-reasons">{{ topic.recommendation_reasons|join(" · ") }}</span>
+        </label>
+        {% endfor %}
+      </div>
+      <div class="form-actions">
+        <button type="submit">生成并下载报告</button>
+        <a class="button-link secondary-link" href="/topics-board">查看完整主题池</a>
+      </div>
+    </form>
+    {% else %}
+    <p class="muted">当前还没有推荐选题，先同步来源后系统会自动生成候选。</p>
+    <form action="/ui/sources/sync" method="post">
+      <button type="submit">立即同步信源</button>
+    </form>
+    {% endif %}
+  </article>
+  <article class="card">
+    <h3>风格画像摘要</h3>
+    <ul>
+      {% for note in corpus.profile.voice_notes %}
+      <li>{{ note }}</li>
+      {% endfor %}
+      {% for note in corpus.profile.worldview_notes[:3] %}
+      <li>{{ note }}</li>
+      {% endfor %}
+    </ul>
+  </article>
+  <article class="card">
+    <h3>历史选题优先级</h3>
+    <p class="muted">基于 {{ topic_preferences.document_count }} 篇往期内容、{{ topic_preferences.topic_section_count }} 个主题段落提炼，另已累计 {{ topic_preferences.selection_feedback_count }} 组显式勾选偏好。</p>
+    <ul>
+      {% for item in topic_preferences.priority_categories[:4] %}
+      <li>{{ item.label }} · {{ item.share }}%</li>
+      {% endfor %}
+    </ul>
+    <div class="chip-list">
+      {% for keyword in topic_preferences.priority_keywords[:8] %}
+      <span class="chip">{{ keyword }}</span>
+      {% endfor %}
+    </div>
+  </article>
+  <article class="card">
+    <h3>最近期数</h3>
+    {% if issues %}
+      <ul>
+        {% for issue in issues %}
+        <li><a href="/issues/{{ issue.id }}">{{ issue.title }}</a> · {{ issue.status }} · {{ issue.week_key }}</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="muted">还没有生成任何期数。</p>
+    {% endif %}
+  </article>
+</section>
+{% endblock %}

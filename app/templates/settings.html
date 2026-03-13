@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="page-header">
+  <div>
+    <p class="eyebrow">设置中心</p>
+    <h2>默认策略与生产模型</h2>
+  </div>
+</section>
+
+<section class="grid cols-2">
+  <article class="card">
+    <h3>风格与立场</h3>
+    <p class="muted">版本：{{ profile.version }}</p>
+    <h4>Voice Notes</h4>
+    <ul>{% for item in profile.voice_notes %}<li>{{ item }}</li>{% endfor %}</ul>
+    <h4>Worldview Notes</h4>
+    <ul>{% for item in profile.worldview_notes %}<li>{{ item }}</li>{% endfor %}</ul>
+  </article>
+  <article class="card">
+    <h3>生产模型</h3>
+    <p><strong>ID：</strong>{{ production_model.id or "尚未设置" }}</p>
+    <p><strong>Base：</strong>{{ production_model.base_model or "未设置" }}</p>
+    <pre>{{ production_model.metrics or {} }}</pre>
+  </article>
+</section>
+
+<section class="grid cols-2">
+  <article class="card">
+    <h3>OpenAI 编辑能力</h3>
+    <p><strong>状态：</strong>{{ "已启用" if openai_status.enabled else "未启用" }}</p>
+    <p><strong>模型：</strong>{{ openai_status.model }}</p>
+    <p><strong>接口：</strong>{{ openai_status.base_url }}</p>
+    <p class="muted">当前默认策略已经切回本地模型。这里保留为可选增强能力，只有你以后明确启用时，主题证据包提纯和观点生成才会额外调用 OpenAI。</p>
+  </article>
+  <article class="card">
+    <h3>当前策略</h3>
+    <p class="muted">报告生成、下载按钮和工作台默认都使用本地模型。这样不用 API Key，也不会因为外部接口状态影响你的日常生成流程。</p>
+  </article>
+</section>
+
+<section class="card">
+  <h3>历史选题优先级</h3>
+  <p class="muted">系统已从你过去 {{ topic_preferences.document_count }} 篇内容、{{ topic_preferences.topic_section_count }} 个主题段落中学习长期优先方向，并沉淀了 {{ topic_preferences.selection_feedback_count }} 组显式勾选偏好。</p>
+  <table>
+    <thead><tr><th>优先方向</th><th>占比</th><th>最近例子</th></tr></thead>
+    <tbody>
+      {% for item in topic_preferences.priority_categories %}
+      <tr>
+        <td>{{ item.label }}</td>
+        <td>{{ item.share }}%</td>
+        <td>{{ item.examples|join(' / ') }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div class="chip-list">
+    {% for keyword in topic_preferences.priority_keywords %}
+    <span class="chip">{{ keyword }}</span>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="card">
+  <h3>默认信源</h3>
+  <table>
+    <thead><tr><th>名称</th><th>类型</th><th>语言</th><th>抓取入口</th></tr></thead>
+    <tbody>
+      {% for source in sources %}
+      <tr>
+        <td>{{ source.name }}</td>
+        <td>{{ source.source_type }}</td>
+        <td>{{ source.language }}</td>
+        <td>{{ source.feed_url or source.page_url }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

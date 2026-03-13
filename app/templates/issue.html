@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="page-header">
+  <div>
+    <p class="eyebrow">本期写作台</p>
+    <h2>{{ issue.title }}</h2>
+    <p class="muted">{{ issue.week_key }} · {{ issue.status }}</p>
+  </div>
+  <form action="/ui/issues/{{ issue.id }}/generate" method="post">
+    <label class="checkbox-inline">
+      <input type="checkbox" name="regenerate" value="true">
+      强制重新生成
+    </label>
+    <button type="submit">生成 / 重生成</button>
+  </form>
+</section>
+
+<section class="grid cols-2">
+  <article class="card">
+    <h3>已选主题</h3>
+    {% if issue.selected_topics %}
+    <ul class="selected-topic-list">
+      {% for topic in issue.selected_topics %}
+      <li>
+        <strong>{{ topic.title }}</strong>
+        <span class="muted">{{ topic.category }} · 分数 {{ topic.score }}</span>
+        <div class="muted">{{ topic.summary }}</div>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="muted">当前没有选题。</p>
+    {% endif %}
+  </article>
+  <article class="card">
+    <h3>最新草稿</h3>
+    {% if issue.drafts %}
+      <p>{{ issue.drafts[0].version_label }} · {{ issue.drafts[0].created_at }}</p>
+      <p class="muted">近似字数：{{ issue.drafts[0].metrics.approx_length }}</p>
+      <a class="button-link" href="/issues/{{ issue.id }}/export?fmt=md">导出 Markdown</a>
+      <a class="button-link" href="/issues/{{ issue.id }}/export?fmt=html">导出 HTML</a>
+    {% else %}
+      <p class="muted">还没有草稿。</p>
+    {% endif %}
+  </article>
+</section>
+
+<section class="card">
+  <h3>本轮批改重点</h3>
+  <p class="muted">优先看三件事：选题判断力、事实到观点的推进、个人声音。</p>
+  <p class="muted">评分映射：风格 = 个人声音，结构 = 观点推进，可发 = 选题判断力 / 是否值得留在成稿里。</p>
+  <p class="muted">推荐 Flags：选题偏弱、偏消费资讯、只在复述新闻、没有推导到影响、不像我、机器腔、缺少我的判断、来源不够硬。</p>
+</section>
+
+{% for section in issue.sections %}
+<section class="card">
+  <h3>{{ section.title }}</h3>
+  <div class="issue-layout">
+    <div>
+      <h4>当前段落</h4>
+      <pre class="article-block">{{ section.content }}</pre>
+      {% if section.critic_notes %}
+      <p class="muted">Critic：{{ section.critic_notes|join(' / ') }}</p>
+      {% endif %}
+      {% if section.citations %}
+      <ul>
+        {% for citation in section.citations %}
+        <li>[{{ citation.index }}] {{ citation.url }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </div>
+    <form action="/ui/issues/{{ issue.id }}/feedback" method="post" class="feedback-form">
+      <input type="hidden" name="section_id" value="{{ section.id }}">
+      <input type="hidden" name="original_text" value="{{ section.content }}">
+      <label>编辑后文本
+        <textarea name="edited_text" rows="10">{{ section.content }}</textarea>
+      </label>
+      <label>Chosen Text
+        <textarea name="chosen_text" rows="4">{{ section.content }}</textarea>
+      </label>
+      <label>Rejected Text
+        <textarea name="rejected_text" rows="4"></textarea>
+      </label>
+      <label>原因
+        <input type="text" name="reason" value="manual_edit">
+      </label>
+      <div class="score-grid">
+        <label>事实 <input type="number" name="factuality" min="1" max="5" value="4"></label>
+        <label>风格（个人声音） <input type="number" name="style" min="1" max="5" value="4"></label>
+        <label>结构（观点推进） <input type="number" name="structure" min="1" max="5" value="4"></label>
+        <label>可发（选题判断） <input type="number" name="publishability" min="1" max="5" value="4"></label>
+      </div>
+      <label>Flags（逗号分隔）
+        <input type="text" name="flags" placeholder="选题偏弱,只在复述新闻,不像我,机器腔,来源不够硬">
+      </label>
+      <label>整段备注
+        <textarea name="notes" rows="3" placeholder="这段只是在复述新闻，没有推进到真正重要的判断；如果按我的写法，我会先讲事实，再落到对市场/政策/资产的影响。"></textarea>
+      </label>
+      <label>整篇结论
+        <select name="verdict">
+          <option value="needs_edit">needs_edit</option>
+          <option value="publish_ready">publish_ready</option>
+        </select>
+      </label>
+      <button type="submit">保存反馈</button>
+    </form>
+  </div>
+</section>
+{% endfor %}
+{% endblock %}

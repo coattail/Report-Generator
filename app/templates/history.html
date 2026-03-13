@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="page-header">
+  <div>
+    <p class="eyebrow">历史草稿与版本对比</p>
+    <h2>所有已创建期数</h2>
+  </div>
+</section>
+
+<section class="card">
+  <table>
+    <thead><tr><th>标题</th><th>周序号</th><th>状态</th><th>更新时间</th></tr></thead>
+    <tbody>
+      {% for issue in issues %}
+      <tr>
+        <td><a href="/issues/{{ issue.id }}">{{ issue.title }}</a></td>
+        <td>{{ issue.week_key }}</td>
+        <td>{{ issue.status }}</td>
+        <td>{{ issue.updated_at }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" class="muted">还没有任何历史草稿。</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}
