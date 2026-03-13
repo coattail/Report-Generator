@@ -20,7 +20,7 @@
 ## 快速启动
 
 ```bash
-cd /Users/yuwan/Documents/New\ project/local-briefing-studio
+cd /path/to/local-briefing-studio
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -e .
@@ -38,16 +38,16 @@ uvicorn app.main:app --reload
 如果你的历史周报是带密码的 PDF，可以直接批量导入，无需先手工另存：
 
 ```bash
-cd /Users/yuwan/Documents/New\ project/local-briefing-studio
+cd /path/to/local-briefing-studio
 source .venv/bin/activate
-python scripts/import_local_corpus.py /Users/yuwan/Desktop/订阅 --password 654321 --train-sft
+python scripts/import_local_corpus.py /path/to/your-corpus-folder --password 654321 --train-sft
 ```
 
 也支持通过环境变量注入默认密码：
 
 ```bash
 export BRIEFING_PDF_PASSWORD=654321
-python scripts/import_local_corpus.py /Users/yuwan/Desktop/订阅 --train-sft
+python scripts/import_local_corpus.py /path/to/your-corpus-folder --train-sft
 ```
 
 ## 启动本机真实训练
@@ -55,7 +55,7 @@ python scripts/import_local_corpus.py /Users/yuwan/Desktop/订阅 --train-sft
 历史语料导入完后，可以直接在本机启动 `MLX-LM LoRA` 微调：
 
 ```bash
-cd /Users/yuwan/Documents/New\ project/local-briefing-studio
+cd /path/to/local-briefing-studio
 source .venv/bin/activate
 python scripts/train_writer_mlx.py --model mlx-community/Qwen2.5-7B-Instruct-4bit
 ```
@@ -129,6 +129,6 @@ local-briefing-studio/
 ## 测试
 
 ```bash
-cd /Users/yuwan/Documents/New\ project/local-briefing-studio
+cd /path/to/local-briefing-studio
 python3 -m unittest discover tests
 ```
